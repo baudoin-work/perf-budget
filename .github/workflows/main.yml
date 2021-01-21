@@ -6,6 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: amondnet/vercel-action@v20
+        id: vercel_deploy
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
           github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
@@ -17,17 +18,12 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - name: Capture Vercel preview URL
-        id: vercel_preview_url
-        uses: aaron-binary/vercel-preview-url-action@v0.0.2
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Audit preview URL with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v3
         with:
           urls: |
-            ${{ steps.vercel_preview_url.outputs.vercel_preview_url }}
+            ${{ steps.vercel_deploy.outputs.preview-url }}
           budgetPath: ./perf-budget.json
           uploadArtifacts: true
           temporaryPublicStorage: temporaryPublicStorage
