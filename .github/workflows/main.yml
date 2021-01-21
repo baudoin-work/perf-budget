@@ -13,18 +13,10 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID}}  #Required
           vercel-project-id: ${{ secrets.PROJECT_ID}} #Required
   generate_lighthouse_audit:
+    needs: [deploy]
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - name: Add comment to PR
-        id: loading_comment_to_pr
-        uses: marocchino/sticky-pull-request-comment@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          number: ${{ github.event.issue.number }}
-          header: lighthouse
-          message: |
-            Running Lighthouse audit...
       - name: Capture Vercel preview URL
         id: vercel_preview_url
         uses: aaron-binary/vercel-preview-url-action@v0.0.2
