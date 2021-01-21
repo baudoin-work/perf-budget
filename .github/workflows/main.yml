@@ -3,21 +3,28 @@ on: [pull_request]
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    id: deploy
     steps:
       - uses: actions/checkout@v2
       - uses: amondnet/vercel-action@v20
         id: vercel_deploy
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-          github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
-          vercel-org-id: ${{ secrets.ORG_ID}}  #Required
-          vercel-project-id: ${{ secrets.PROJECT_ID}} #Required
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }} 
+          vercel-args: '--prod'
+          vercel-org-id: ${{ secrets.ORG_ID}}
+          vercel-project-id: ${{ secrets.PROJECT_ID}
+  generate_lighthouse_audit:
+    needs: [deploy]
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
       - name: Audit preview URL with Lighthouse
         id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v3
         with:
           urls: |
-            ${{ steps.vercel_deploy.outputs.preview-url }}
+            ${{ jobs.deploy.steps.vercel_deploy.outputs.preview-url }}
           budgetPath: ./perf-budget.json
           uploadArtifacts: true
           temporaryPublicStorage: temporaryPublicStorage
