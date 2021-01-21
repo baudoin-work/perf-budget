@@ -1,30 +1,15 @@
-name: PR Preview Deploy
-on: [pull_request]
+name: Lighthouse CI
+on: deployment_status
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    id: deploy
-    steps:
-      - uses: actions/checkout@v2
-      - uses: amondnet/vercel-action@v20
-        id: vercel_deploy
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          github-token: ${{ secrets.GITHUB_TOKEN }} 
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.ORG_ID}}
-          vercel-project-id: ${{ secrets.PROJECT_ID}
   generate_lighthouse_audit:
-    needs: [deploy]
+    if: github.event.deployment_status.state == 'success'
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Audit preview URL with Lighthouse
-        id: lighthouse_audit
         uses: treosh/lighthouse-ci-action@v3
         with:
           urls: |
-            ${{ jobs.deploy.steps.vercel_deploy.outputs.preview-url }}
+            ${{ github.event.deployment_status.target_url }}
           budgetPath: ./perf-budget.json
-          uploadArtifacts: true
           temporaryPublicStorage: temporaryPublicStorage
